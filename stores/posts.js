@@ -41,12 +41,20 @@ export const usePosts = defineStore('posts', () => {
     }
   }
 
-  async function create ({ title, body }) {
+  async function create ({ title, body, image = null }) {
     const { $api } = useNuxtApp()
     loading.value = true
 
     try {
-      const response = await $api.post('/posts', { title, body })
+      const formData = new FormData()
+      formData.append('title', title)
+      formData.append('body', body)
+
+      if (image) {
+        formData.append('image', image)
+      }
+
+      const response = await $api.post('/posts', formData)
       data.value.unshift(response.data)
       return response.data
     } finally {

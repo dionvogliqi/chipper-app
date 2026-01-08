@@ -48,6 +48,11 @@ async function togglePostFavorite() {
     <p>
       {{ post.body }}
     </p>
+    <img
+      v-if="post.image_url"
+      :src="post.image_url"
+      :alt="post.title"
+      class="w-full rounded-lg object-cover max-h-96">
     <button
       v-if="!user.isGuest"
       class="flex items-center justify-center gap-2 p-4 rounded-lg transition-colors"
