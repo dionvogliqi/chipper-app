@@ -22,14 +22,19 @@ export const useUser = defineStore('user', () => {
     data.value = payload.data
     token.value = payload.token
 
-    // Write cookie
     tokenCookie.value = payload.token
+
+    const favorites = useFavorites()
+    await favorites.fetch()
   }
 
   function clear () {
     data.value = {}
     token.value = null
     tokenCookie.value = null
+
+    const favorites = useFavorites()
+    favorites.clear()
   }
 
   async function login ({ email, password }) {
