@@ -1,18 +1,20 @@
 export const useFavorites = defineStore('favorites', () => {
-  const data = ref([])
+  const users = ref([])
+  const posts = ref([])
 
   const loading = ref(false)
 
-  function isFavorited(userId) {
-    return data.value.some(user => user.id === userId)
+  function isUserFavorited(userId) {
+    return users.value.some(user => user.id === userId)
   }
 
-  function setFavorites(favorites) {
-    data.value = favorites || []
+  function isPostFavorited(postId) {
+    return posts.value.some(post => post.id === postId)
   }
 
   function clear() {
-    data.value = []
+    users.value = []
+    posts.value = []
   }
 
   async function fetch() {
@@ -20,54 +22,92 @@ export const useFavorites = defineStore('favorites', () => {
 
     try {
       const response = await $api.get('/favorites')
-      data.value = response.data.users || []
+      users.value = response.data.users || []
+      posts.value = response.data.posts || []
     } catch (e) {
-      data.value = []
+      users.value = []
+      posts.value = []
     }
   }
 
-  async function add(userId, userName = null) {
+  async function addUser(userId, userName = null) {
     const { $api } = useNuxtApp()
     loading.value = true
 
     try {
       await $api.post(`/users/${userId}/favorite`)
-      data.value.push({ id: userId, name: userName })
+      users.value.push({ id: userId, name: userName })
     } finally {
       loading.value = false
     }
   }
 
-  async function remove(userId) {
+  async function removeUser(userId) {
     const { $api } = useNuxtApp()
     loading.value = true
 
     try {
       await $api.delete(`/users/${userId}/favorite`)
-      data.value = data.value.filter(user => user.id !== userId)
+      users.value = users.value.filter(user => user.id !== userId)
     } finally {
       loading.value = false
     }
   }
 
-  async function toggle(userId, userName = null) {
-    if (isFavorited(userId)) {
-      await remove(userId)
+  async function toggleUser(userId, userName = null) {
+    if (isUserFavorited(userId)) {
+      await removeUser(userId)
     } else {
-      await add(userId, userName)
+      await addUser(userId, userName)
+    }
+  }
+
+  async function addPost(postId) {
+    const { $api } = useNuxtApp()
+    loading.value = true
+
+    try {
+      await $api.post(`/posts/${postId}/favorite`)
+      posts.value.push({ id: postId })
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function removePost(postId) {
+    const { $api } = useNuxtApp()
+    loading.value = true
+
+    try {
+      await $api.delete(`/posts/${postId}/favorite`)
+      posts.value = posts.value.filter(post => post.id !== postId)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function togglePost(postId) {
+    if (isPostFavorited(postId)) {
+      await removePost(postId)
+    } else {
+      await addPost(postId)
     }
   }
 
   return {
-    data,
+    users,
+    posts,
     loading,
-    isFavorited,
-    setFavorites,
+    isUserFavorited,
+    isPostFavorited,
     clear,
     fetch,
-    add,
-    remove,
-    toggle
+    addUser,
+    removeUser,
+    toggleUser,
+    addPost,
+    removePost,
+    togglePost
   }
 })
 
